@@ -1,0 +1,25 @@
+{
+  "records": 781,
+  "explicitDates": 448,
+  "inheritedDates": 333,
+  "papalPeriodCounts": {
+    "Clement VIII": 8,
+    "Paul V": 74,
+    "Grégoire XV": 43,
+    "Urbain VIII": 203,
+    "Innocent X": 86,
+    "Alexandre VII": 88,
+    "Clément IX": 19,
+    "Clément X": 55,
+    "Innocent XI": 132,
+    "Alexandre VIII": 11,
+    "Innocent XII": 62
+  },
+  "mappedRecords": 475,
+  "unresolvedOriginRecords": 214,
+  "noOriginRecords": 92,
+  "distinctOriginLabels": 269,
+  "reviewedAuthorityLabels": 73,
+  "ambiguousUnmappedLabels": 1,
+  "needsReviewLabels": 195
+}

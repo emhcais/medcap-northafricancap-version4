@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore documented places of origin and baptismal records for captives from North Africa and the Ottoman world, 1600–1699.">
+  <title>Captives from North Africa and the Ottoman World</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://tile.openstreetmap.org">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#records-heading">Skip to records</a>
+  <header class="site-header">
+    <div>
+      <h1>Captives from North Africa and the Ottoman World</h1>
+      <p class="subtitle">Documented origins and baptismal records in Rome, 1600–1699</p>
+    </div>
+    <nav class="download-nav" aria-label="Project actions">
+      <button id="help-button" class="header-button" type="button">How to use this map</button>
+      <a href="data/north-african-captives-complete.csv" download>Download complete dataset (CSV)</a>
+    </nav>
+  </header>
+
+  <main class="app-shell">
+    <aside class="sidebar" aria-label="Map controls and records">
+      <section class="controls" aria-labelledby="filter-heading">
+        <div class="section-heading-row">
+          <div>
+            <p class="eyebrow">Explore the evidence</p>
+            <h2 id="filter-heading">Filters</h2>
+          </div>
+          <button id="reset-filters" class="text-button" type="button">Reset Filters</button>
+        </div>
+
+        <label class="field-label" for="record-search">Search all records</label>
+        <input id="record-search" type="search" placeholder="Original or baptismal name, place, year, or pope" autocomplete="off">
+        <p class="field-help search-help">Search includes all 781 records, including people without a reviewed map point.</p>
+
+        <fieldset class="year-filter">
+          <legend>Year range</legend>
+          <div class="year-readout"><output id="min-year-output">—</output><span>to</span><output id="max-year-output">—</output></div>
+          <div class="range-stack" aria-label="Choose a minimum and maximum year on one timeline">
+            <input id="min-year" type="range" aria-label="Minimum year">
+            <input id="max-year" type="range" aria-label="Maximum year">
+          </div>
+          <p class="field-help">Move either handle on the single timeline. Inherited dates are identified in each record.</p>
+        </fieldset>
+
+        <div class="select-field">
+          <label class="field-label" for="papal-period">Papal Period</label>
+          <select id="papal-period">
+            <option value="">All Papal Periods</option>
+          </select>
+        </div>
+
+        <fieldset class="map-filter">
+          <legend>Shown on the map and in the list</legend>
+          <div class="map-filter-options three-options">
+            <label><input type="radio" name="map-mode" value="all" checked><span>All records</span></label>
+            <label><input type="radio" name="map-mode" value="mapped"><span class="legend-dot origin"></span><span>Mapped origins</span></label>
+            <label><input type="radio" name="map-mode" value="no-origin"><span>No recorded origin</span></label>
+          </div>
+        </fieldset>
+
+        <div id="selection-chip" class="selection-chip" hidden>
+          <span id="selection-label"></span>
+          <button id="clear-selection" type="button" aria-label="Clear map selection">×</button>
+        </div>
+      </section>
+
+      <section class="summary-grid" aria-label="Filtered summary">
+        <div><strong id="stat-records">—</strong><span>matching records</span></div>
+        <div><strong id="stat-mapped">—</strong><span>with map points</span></div>
+        <div><strong id="stat-locations">—</strong><span>mapped origin points</span></div>
+        <div><strong id="stat-unmapped">—</strong><span>without a map point</span></div>
+      </section>
+
+      <section class="records-section" aria-labelledby="records-heading">
+        <div class="section-heading-row compact">
+          <h2 id="records-heading" tabindex="-1">Records</h2>
+          <span id="record-count" aria-live="polite"></span>
+        </div>
+        <p id="record-limit-note" class="field-help"></p>
+        <div id="record-list" class="record-list" tabindex="-1"></div>
+      </section>
+    </aside>
+
+    <section class="map-region" aria-label="Interactive map">
+      <div id="map" role="application" aria-label="Map of reviewed documented origins for captives from North Africa and the Ottoman world"></div>
+      <div class="map-note">
+        <strong>What the map shows</strong>
+        <span>Reviewed places of origin only. Rome is not plotted, and no routes are reconstructed.</span>
+      </div>
+      <div class="map-legend" aria-label="Map legend">
+        <strong>Map key</strong>
+        <span><i class="legend-dot origin"></i> Reviewed origin</span>
+        <span><i class="legend-dot region"></i> Generalized region or island</span>
+      </div>
+      <div id="loading" class="loading-card" role="status">Loading historical records…</div>
+      <div id="map-error" class="error-card" hidden></div>
+    </section>
+  </main>
+
+  <aside id="detail-panel" class="detail-panel" aria-labelledby="detail-title" aria-hidden="true">
+    <button id="close-detail" class="detail-close" type="button" aria-label="Close record details">×</button>
+    <p class="eyebrow">Historical record</p>
+    <h2 id="detail-title">Record details</h2>
+    <p id="detail-subtitle" class="detail-subtitle"></p>
+    <div id="detail-content"></div>
+  </aside>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="help-header">
+      <div>
+        <p class="eyebrow">Quick guide</p>
+        <h2 id="help-title">How to use this map</h2>
+      </div>
+      <button id="close-help" class="detail-close help-close" type="button" aria-label="Close guide">×</button>
+    </div>
+    <div class="guide-grid">
+      <section><strong>1. Find a person</strong><p>Search either the original or baptismal name. You can also search a place, year, or papal period.</p></section>
+      <section><strong>2. Narrow the dates</strong><p>Move the two handles on the single year timeline to focus on a historical period.</p></section>
+      <section><strong>3. Choose a Papal Period</strong><p>Use the dropdown to show one papal period, or keep All Papal Periods selected.</p></section>
+      <section><strong>4. Read the evidence</strong><p>Click a map point to narrow the list, then choose a person to open the six-field historical record.</p></section>
+    </div>
+    <div class="guide-note"><strong>Remember:</strong> the map shows reviewed origins only. Unresolved origins and missing origins remain searchable; Rome is not a destination marker.</div>
+    <button id="finish-help" class="guide-finish" type="button">Start exploring</button>
+  </dialog>
+
+  <footer>
+    <p><strong>Interpretive caution:</strong> points represent reviewed references for documented origin labels. They do not prove birthplace, route, captivity location, or destination. Generalized regional points are approximate.</p>
+    <p>All 781 people remain searchable. Original Date cells and inherited Years remain available in the complete CSV. Papal headings govern subsequent records; the Clement VIII assignment is explicitly marked as inferred.</p>
+  </footer>
+
+  <noscript><p class="noscript">This interactive map requires JavaScript. The complete dataset is still available from the CSV download.</p></noscript>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="data/app-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
